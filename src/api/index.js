@@ -20,3 +20,9 @@ export const getHomepage = params => {
         params
     });
 };
+export const getProducts = () => {
+    return request({
+        method: 'GET',
+        url: '/products'
+    });
+};
