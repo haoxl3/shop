@@ -12,10 +12,17 @@
                 <right-circle-outlined />
             </div>
             </template>
-            <div><h3>1</h3></div>
-            <div><h3>2</h3></div>
-            <div><h3>3</h3></div>
-            <div><h3>4</h3></div>
+            <div class="swiper-item" v-for="(item, i) in props.banner">
+                <div class="swiper-box">
+                    <div class="swiper-left">
+                        <h3 :style="{color: item.text_color}">{{item.desktop_sub_title || item.sub_title}}</h3>
+                        <h1 :style="{color: item.text_color}">{{item.desktop_title || item.title}}</h1>
+                    </div>
+                    <div class="banner-right">
+                        <img :src="`https://pixl.decathlon.com.cn/${item.picture_desktop}/banner.jpg`" :alt="item.title">
+                    </div>
+                </div>
+            </div>
         </a-carousel>
     </div>
 </template>
@@ -39,6 +46,48 @@ function changeFn(from, to) {
     background-color: orangered;
     transform-origin: 0 0;
     transform: skew(0, -8deg);
+}
+.swiper-item {
+    height: 575px;
+    .swiper-box {
+        display: flex;
+        min-width: 1200px;
+        justify-content: center;
+        .swiper-left {
+            width: 340px;
+            padding-right: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 100px;
+            text-align: right;
+        }
+        .banner-right {
+            margin-top: 45px;
+            transform-origin: 0 100%;
+            transform: skew(0, -8deg);
+            overflow: hidden;
+            border-radius: 20px;
+            border-bottom-right-radius: 80px;
+            img {
+                transform-origin: 0 100%;
+                transform: skew(0, 8deg);
+                border-radius: 20px;
+            }
+        }
+        h3 {
+            font-size: 30px;
+            font-weight: 900;
+            margin: 0;
+            line-height: 40px;
+        }
+        h1 {
+            font-size: 60px;
+            font-weight: 900;
+            margin: 0;
+            line-height: 70px;
+        }
+    }
 }
 .ant-carousel :deep(.slick-slide) {
     text-align: center;
