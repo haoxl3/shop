@@ -1,8 +1,17 @@
 <template>
     <div class="loading" v-show="data.isLoading">
-        <Loading/>
+        <Loading :progress="data.progress"/>
     </div>
-    <div class="product" v-show="!data.isLoading">
+    <div class="product" v-show="!data.isLoading" id="product">
+        <div
+            class="desc"
+            :class="{active: data.descIndex === i}"
+            v-if="data.products[data.pIndex]"
+            v-for="(desc, i) in data.products[data.pIndex].desc"
+        >
+            <h1 class="title">{{desc.title}}</h1>
+            <p class="content">{{desc.content}}</p>
+        </div>
         <div class="prod-list" :class="{hidden: store.state.isFullScreen}">
             <h1><SketchOutlined/>产品推荐</h1>
             <div class="products">
@@ -32,6 +41,7 @@
 <script setup>
 import {useRoute} from 'vue-router';
 import {useStore} from 'vuex';
+import Base3d from '../utils/Base3d';
 import {onMounted, reactive} from 'vue';
 import * as api from '../api/index';
 import Loading from '../components/Loading.vue';
@@ -43,20 +53,35 @@ const data = reactive({
     isLoading: true,
     scenes: [],
     pIndex: 0,
-    sceneIndex: 0
+    sceneIndex: 0,
+    base3d: {},
+    descIndex: 0,
+    progress: 0
 });
 onMounted(async () => {
     let result = await api.getProducts();
     console.log(result);
-    data.isLoading = false;
+    // data.isLoading = false;
     data.products = result.list;
     data.scenes = result.hdr;
+    data.base3d = new Base3d('#product', LoadingFinish);
+    data.base3d.onProgress(e => {
+        let progressNum = e.loaded / e.total;
+        progressNum = progressNum.toFixed(2) * 100;
+        console.log(progressNum);
+        data.progress = progressNum;
+    });
 });
+function LoadingFinish() {
+    data.isLoading = false;
+}
 function changeModel(prod, pI) {
     data.pIndex = pI;
+    data.base3d.setModel(prod.modelName);
 }
 function changeHdr(scene, index) {
     data.sceneIndex = index;
+    data.base3d.setEnvMap(scene);
 }
 function addBuycart(prod) {
     let product = {...prod, num: 1};
@@ -85,9 +110,28 @@ window.addEventListener('mousewheel', e => {
     if (e.deltaY < 0) {
         store.commit('setFullScreen', false);
     }
+    let duration = data.base3d.animateAction._clip.duration;
+    let time = data.base3d.animateAction.time;
+    let index = Math.floor((time / duration) * 4);
+    data.descIndex = index;
 });
 </script>
 <style lang="less" scoped>
+.desc {
+    position: fixed;
+    z-index: 100000;
+    background-color: rgba(255, 255, 255, .5);
+    width: 600px;
+    top: 100px;
+    left: 50%;
+    margin-left: -300px;
+    transition: all .5s;
+    padding: 15px;
+    transform: translate(-100vw, 0);
+}
+.desc.active {
+    transform: translate(0, 0);
+}
 .prod-list {
     width: 300px;
     height: 100vh;
